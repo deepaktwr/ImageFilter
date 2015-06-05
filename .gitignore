@@ -1,0 +1,24 @@
+#gradles
+.gradle
+#properties
+/local.properties
+#user specific configs
+/.idea/workspace.xml
+/.idea/libraries
+/.idea.tasks.xml
+/.idea/.name
+/.idea/compiler.xml
+/.idea/copyright/profiles_settings.xml
+/.idea/encodings.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/scopes/scope_settings.xml
+/.idea/vcs.xml
+*.iml
+#os specific configs
+.DS_Store
+#builds
+/build/
+/*/build/
+#signings
+.signing/
