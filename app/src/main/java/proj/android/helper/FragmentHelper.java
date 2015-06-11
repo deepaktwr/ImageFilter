@@ -58,6 +58,7 @@ public class FragmentHelper {
             this.fragmentManager.put(DEFAULT_KEY, fragmentManager);
             this.containerId.put(DEFAULT_KEY, containerId);
             this.commitIds.put(DEFAULT_KEY, new ArrayList<Integer>());
+            this.fragmentTag.put(DEFAULT_KEY, new ArrayList<String>());
         }
         else
             throw new FragmentException("manager and container has already been specified for this activity.");
@@ -69,11 +70,13 @@ public class FragmentHelper {
             this.fragmentManager.put(DEFAULT_KEY, fragmentManager);
             this.containerId.put(DEFAULT_KEY, containerId);
             this.commitIds.put(DEFAULT_KEY, new ArrayList<Integer>());
+            this.fragmentTag.put(DEFAULT_KEY, new ArrayList<String>());
         }
         else if(this.fragmentManager.get(key) == null){
             this.fragmentManager.put(key, fragmentManager);
             this.containerId.put(key, containerId);
             this.commitIds.put(key, new ArrayList<Integer>());
+            this.fragmentTag.put(key, new ArrayList<String>());
         }else
             throw new FragmentException("manager with key= "+key+" has already been specified.");
     }
@@ -230,11 +233,14 @@ public class FragmentHelper {
         }
 
         FragmentTransaction transaction = fragmentManager.get(DEFAULT_KEY).beginTransaction();
-        if(hasAnim && checkAnim())
-            transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
-        else
-            throw new FragmentException("no transition animation has been set, call " +
-                    "applyAnimationForTransition before this method to apply transitions");
+        if(hasAnim){
+            if(checkAnim())
+                transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
+            else
+                throw new FragmentException("no transition animation has been set, call " +
+                        "applyAnimationForTransition before this method to apply transitions");
+        }
+
 
         if(!TextUtils.isEmpty(fragmentTag)) {
             if(this.fragmentTag.get(DEFAULT_KEY).contains(fragmentTag))
