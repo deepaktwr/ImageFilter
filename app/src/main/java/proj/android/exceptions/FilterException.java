@@ -15,10 +15,10 @@ public class FilterException extends Exception{
     }
     public FilterException(Throwable cause){
         super(cause);
-        Utils.logMessage(cause.getMessage());
+        Utils.logMessage("by cause "+cause.getCause()+" with message "+cause.getMessage());
     }
     public FilterException(String message, Throwable cause){
         super(message, cause);
-        Utils.logMessage(message+" by cause "+cause.getMessage());
+        Utils.logMessage(message+" by cause "+cause.getCause()+" with message "+cause.getMessage());
     }
 }
