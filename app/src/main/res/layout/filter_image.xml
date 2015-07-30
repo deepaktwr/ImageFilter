@@ -8,23 +8,22 @@
         android:id="@+id/filter_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@android:drawable/ic_dialog_dialer"
+        android:src="@android:drawable/alert_light_frame"
         android:layout_centerInParent="true"
         />
     <TextView
         android:id="@+id/filter_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:textColor="#a4121212"
+        android:layout_centerInParent="true"
+        android:textColor="#d8121212"
         android:text="filter_type"
+        android:gravity="center"
         android:textAppearance="?android:textAppearanceMedium"
         />
-    <ProgressBar
+<!--    <ProgressBar
         android:id="@+id/filter_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"/>-->
 </RelativeLayout>
