@@ -9,7 +9,8 @@ import android.opengl.GLSurfaceView;
 public class GlSurfaceView extends GLSurfaceView{
 
     private static GlSurfaceView glSurfaceView;
-    private GlRenderer glRenderer;
+    /*private GlRenderer glRendererForDemos;*/
+    private GlRendererForFilter glRendererForFilter;
     private Context context;
 
     public static final GlSurfaceView getInstance(Context context){
@@ -25,9 +26,26 @@ public class GlSurfaceView extends GLSurfaceView{
         this.context=context;
     }
     private final void init(){
-        setEGLContextClientVersion(2);
-        glRenderer = new GlRenderer(context);
-        setRenderer(glRenderer);
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        // setting the GLSL version to 3 along with in the manifest
+        setEGLContextClientVersion(3);
+        //setGlRendererForDemos();
+        setGlRendererForFilter();
+
+        // RENDERMODE_WHEN_DIRTY clarifies that the rendering only perform when their is already some data on the openGL window
+        //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        //continuous for calling onDrawFrame again and again for redrawing
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+    private void setGlRendererForFilter(){
+        glRendererForFilter = new GlRendererForFilter(context);
+        setRenderer(glRendererForFilter);
+    }
+    private void setGlRendererForDemos(){
+        /*glRendererForDemos = new GlRenderer(context);
+        setRenderer(glRendererForDemos);*/
+    }
+
+    public void drawNewTexture(int vertexShaderId, int fragmentShaderId){
+        glRendererForFilter.drawTexture(vertexShaderId, fragmentShaderId);
     }
 }
