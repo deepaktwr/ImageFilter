@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import proj.android.exceptions.BlockExecution;
 import proj.android.exceptions.FragmentException;
 
 /**
@@ -31,7 +32,7 @@ public class FragmentHelper {
 
     private int inAnim, popInAnim, outAnim, popOutAnim;
 
-    //methods has been documented yet
+    //methods has not been documented yet
     private FragmentHelper(Context context){
         if(this.context == null)
             this.context = context;
@@ -78,7 +79,7 @@ public class FragmentHelper {
             this.commitIds.put(key, new ArrayList<Integer>());
             this.fragmentTag.put(key, new ArrayList<String>());
         }else
-            throw new FragmentException("manager with key= "+key+" has already been specified.");
+            throw new FragmentException(Utils.formatMessage("manager with key= %s has already been specified", key));
     }
 
     public synchronized void applyAnimationForTransition(int inAnim, int outAnim, int popInAnim, int popOutAnim) throws FragmentException{
@@ -88,18 +89,19 @@ public class FragmentHelper {
         this.popOutAnim = popOutAnim;
 
         if(inAnim ==0 && popInAnim ==0 && outAnim ==0 && popOutAnim ==0)
-            throw new FragmentException("at least one animation should not be zero");
+            throw new FragmentException("at least one animation should not be zero, method don't need to be called if no" +
+                    " animation between fragments need to be performed");
     }
 
     private boolean checkAnim(){
         return (inAnim|outAnim|popInAnim|popOutAnim) != 0x0f;
     }
 
-    public synchronized void replaceFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim) throws FragmentException{
+    public synchronized void replaceFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim){
         if(fragmentManager.get(DEFAULT_KEY) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         if(fragment == null)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         if(bundle != null) {
             try {
                 fragment.setArguments(bundle);
@@ -107,7 +109,7 @@ public class FragmentHelper {
                 try {
                     fragment.getArguments().putAll(bundle);
                 }catch(Exception exp) {
-                    throw new FragmentException(e.getMessage(), exp);
+                    throw new BlockExecution(e.getMessage(), exp);
                 }
             }
         }
@@ -116,12 +118,15 @@ public class FragmentHelper {
         if(hasAnim && checkAnim())
             transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
         else
-            throw new FragmentException("no transition animation has been set, call " +
-                    "applyAnimationForTransition before this method to apply transitions");
+            Utils.logError(Utils.formatMessage("no transition animation has been set, call " +
+                    "applyAnimationForTransition before this method to apply transitions if methods has hasAnim as true " +
+                    "otherwise make parameter false for fragment %s", fragment.toString()));
 
         if(!TextUtils.isEmpty(fragmentTag)) {
             if(this.fragmentTag.get(DEFAULT_KEY).contains(fragmentTag))
-                throw new FragmentException("tag of this fragment has already defined");
+                throw new BlockExecution(Utils.formatMessage("given tag of the fragment %s has already defined with existing manager" +
+                        " for this or any other fragment," +
+                        " use different tag", fragment.toString()));
             this.fragmentTag.get(DEFAULT_KEY).add(fragmentTag);
             transaction.replace(containerId.get(DEFAULT_KEY), fragment, fragmentTag);
         }else {
@@ -143,9 +148,9 @@ public class FragmentHelper {
         try{
             commitIds.get(DEFAULT_KEY).add(transaction.commit());
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
+            throw new BlockExecution("activity state has been lost, call transaction" +
                     " in onPostResume instead of any other general or async method" +
-                    " from activity.",exp);
+                    " of activity.",exp);
         }
         inAnim =0;outAnim=0;popOutAnim=0;popInAnim=0;
     }
@@ -157,14 +162,14 @@ public class FragmentHelper {
         return managerKey+"_"+backStacks+"_"+commits+"_"+currentFragmentName+"_"+System.currentTimeMillis();
     }
 
-    public synchronized void replaceNestedFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim, String managerKey) throws FragmentException{
+    public synchronized void replaceNestedFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim, String managerKey){
         if(TextUtils.isEmpty(managerKey))
-            throw new FragmentException("managerKey is the key you have given to the nested " +
+            throw new BlockExecution("managerKey is the key you have given to the nested " +
                     "fragment manager, specify key or call replaceFragment instead");
         if(fragmentManager.get(managerKey) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         if(fragment == null)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         if(bundle != null) {
             try {
                 fragment.setArguments(bundle);
@@ -172,7 +177,7 @@ public class FragmentHelper {
                 try {
                     fragment.getArguments().putAll(bundle);
                 }catch(Exception exp) {
-                    throw new FragmentException(e.getMessage(), exp);
+                    throw new BlockExecution(e.getMessage(), exp);
                 }
             }
         }
@@ -181,12 +186,15 @@ public class FragmentHelper {
         if(hasAnim && checkAnim())
             transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
         else
-            throw new FragmentException("no transition animation has been set, call " +
-                    "applyAnimationForTransition before this method to apply transitions");
+            Utils.logError(Utils.formatMessage("no transition animation has been set, call " +
+                    "applyAnimationForTransition before this method to apply transitions if methods has hasAnim as true " +
+                    "otherwise make parameter false for fragment %s", fragment.toString()));
 
         if(!TextUtils.isEmpty(fragmentTag)) {
             if(this.fragmentTag.get(managerKey).contains(fragmentTag))
-                throw new FragmentException("tag of this fragment has already defined");
+                throw new BlockExecution(Utils.formatMessage("given tag of the fragment %s has already defined with existing manager" +
+                        " for this or any other fragment," +
+                        " use different tag", fragment.toString()));
             this.fragmentTag.get(managerKey).add(fragmentTag);
             transaction.replace(containerId.get(managerKey), fragment, fragmentTag);
         }else {
@@ -208,18 +216,18 @@ public class FragmentHelper {
         try{
             commitIds.get(managerKey).add(transaction.commit());
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
+            throw new BlockExecution("activity state has been lost, call transaction" +
                     " in onPostResume instead of any other general or async method" +
                     " from activity.",exp);
         }
         inAnim =0;outAnim=0;popOutAnim=0;popInAnim=0;
     }
 
-    public synchronized void addFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim) throws FragmentException{
+    public synchronized void addFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim){
         if(fragmentManager.get(DEFAULT_KEY) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         if(fragment == null)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         if(bundle != null) {
             try {
                 fragment.setArguments(bundle);
@@ -227,7 +235,7 @@ public class FragmentHelper {
                 try {
                     fragment.getArguments().putAll(bundle);
                 }catch(Exception exp) {
-                    throw new FragmentException(e.getMessage(), exp);
+                    throw new BlockExecution(e.getMessage(), exp);
                 }
             }
         }
@@ -237,14 +245,17 @@ public class FragmentHelper {
             if(checkAnim())
                 transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
             else
-                throw new FragmentException("no transition animation has been set, call " +
-                        "applyAnimationForTransition before this method to apply transitions");
+                Utils.logError(Utils.formatMessage("no transition animation has been set, call " +
+                        "applyAnimationForTransition before this method to apply transitions if methods has hasAnim as true " +
+                        "otherwise make parameter false for fragment %s", fragment.toString()));
         }
 
 
         if(!TextUtils.isEmpty(fragmentTag)) {
             if(this.fragmentTag.get(DEFAULT_KEY).contains(fragmentTag))
-                throw new FragmentException("tag of this fragment has already defined");
+                throw new BlockExecution(Utils.formatMessage("given tag of the fragment %s has already defined with existing manager" +
+                        " for this or any other fragment," +
+                        " use different tag", fragment.toString()));
             this.fragmentTag.get(DEFAULT_KEY).add(fragmentTag);
             transaction.replace(containerId.get(DEFAULT_KEY), fragment, fragmentTag);
         }else {
@@ -266,21 +277,21 @@ public class FragmentHelper {
         try{
             commitIds.get(DEFAULT_KEY).add(transaction.commit());
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
+            throw new BlockExecution("activity state has been lost, call transaction" +
                     " in onPostResume instead of any other general or async method" +
                     " from activity.",exp);
         }
         inAnim =0;outAnim=0;popOutAnim=0;popInAnim=0;
     }
 
-    public synchronized void addNestedFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim, String managerKey) throws FragmentException{
+    public synchronized void addNestedFragment(Fragment fragment, Bundle bundle, String fragmentTag, boolean addToBackStack, boolean hasAnim, String managerKey) {
         if(TextUtils.isEmpty(managerKey))
-            throw new FragmentException("managerKey is the key you have given to the nested " +
+            throw new BlockExecution("managerKey is the key you have given to the nested " +
                     "fragment manager, specify key or call addFragment instead");
         if(fragmentManager.get(managerKey) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         if(fragment == null)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         if(bundle != null) {
             try {
                 fragment.setArguments(bundle);
@@ -288,7 +299,7 @@ public class FragmentHelper {
                 try {
                     fragment.getArguments().putAll(bundle);
                 }catch(Exception exp) {
-                    throw new FragmentException(e.getMessage(), exp);
+                    throw new BlockExecution(e.getMessage(), exp);
                 }
             }
         }
@@ -297,12 +308,15 @@ public class FragmentHelper {
         if(hasAnim && checkAnim())
             transaction.setCustomAnimations(inAnim, outAnim, popInAnim, popOutAnim);
         else
-            throw new FragmentException("no transition animation has been set, call " +
-                    "applyAnimationForTransition before this method to apply transitions");
+            Utils.logError(Utils.formatMessage("no transition animation has been set, call " +
+                    "applyAnimationForTransition before this method to apply transitions if methods has hasAnim as true " +
+                    "otherwise make parameter false for fragment %s", fragment.toString()));
 
         if(!TextUtils.isEmpty(fragmentTag)) {
             if(this.fragmentTag.get(managerKey).contains(fragmentTag))
-                throw new FragmentException("tag of this fragment has already defined");
+                throw new BlockExecution(Utils.formatMessage("given tag of the fragment %s has already defined with existing manager" +
+                        " for this or any other fragment," +
+                        " use different tag", fragment.toString()));
             this.fragmentTag.get(managerKey).add(fragmentTag);
             transaction.replace(containerId.get(managerKey), fragment, fragmentTag);
         }else {
@@ -324,7 +338,7 @@ public class FragmentHelper {
         try{
             commitIds.get(managerKey).add(transaction.commit());
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
+            throw new BlockExecution("activity state has been lost, call transaction" +
                     " in onPostResume instead of any other general or async method" +
                     " from activity.",exp);
         }
@@ -333,28 +347,30 @@ public class FragmentHelper {
 
     public synchronized void removeFragment(Fragment fragment) throws FragmentException{
         if(fragmentManager.get(DEFAULT_KEY) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         boolean isFragNull = fragment == null;
         if(isFragNull)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         FragmentTransaction transaction = fragmentManager.get(DEFAULT_KEY).beginTransaction();
-        if(!isFragNull)
+        if(!isFragNull && transaction!=null)
             transaction = transaction.remove(fragment);
-        else
-            throw new FragmentException("no fragment has been attached with this manager");
+        else if (transaction == null)
+            throw new FragmentException("could not begin transaction with with fragment manager to remove fragment "
+                    +fragment.toString());
 
         try{
             transaction.commit();
             commitIds.get(DEFAULT_KEY).remove(commitIds.get(DEFAULT_KEY).size()-1);
             fragmentTag.get(DEFAULT_KEY).remove(fragmentTag.get(DEFAULT_KEY).size()-1);
-            //need to remove from back stack if added, need to check that*********************************************
+            //*******need to remove from back stack if added, need to check that*********************************************
 
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
-                    " in onPostResume instead of any other general or async method" +
-                    " from activity.",exp);
+            throw new BlockExecution(Utils.formatMessage("activity state has been lost, call transaction" +
+                    " in onPostResume for the fragment %s instead of any other general or async method" +
+                    " from activity", fragment.toString()),exp);
         }catch(NullPointerException exp){
-            throw new FragmentException("trying to remove fragment which has not been added before");
+            throw new FragmentException(Utils.formatMessage("trying to remove fragment %s which has not been added before",
+                    fragment.toString()), exp);
         }
 
     }
@@ -362,71 +378,74 @@ public class FragmentHelper {
     public synchronized void removeNestedFragment(Fragment fragment, String managerKey) throws FragmentException{
 
         if(TextUtils.isEmpty(managerKey))
-            throw new FragmentException("managerKey is the key you have given to the nested " +
+            throw new BlockExecution("managerKey is the key you have given to the nested " +
                     "fragment manager, specify key or call removeFragment instead");
         if(fragmentManager.get(managerKey) == null)
-            throw new FragmentException("manager and container has not been specified yet");
+            throw new BlockExecution("manager and container has not been specified yet");
         boolean isFragNull = fragment == null;
         if(isFragNull)
-            throw new FragmentException("fragment is null");
+            throw new BlockExecution("fragment is null");
         FragmentTransaction transaction = fragmentManager.get(managerKey).beginTransaction();
-        if(!isFragNull)
+        if(!isFragNull && transaction!=null)
             transaction = transaction.remove(fragment);
-        else
-            throw new FragmentException("no fragment has been attached with this manager");
+        else if (transaction == null)
+            throw new FragmentException("could not begin transaction with with fragment manager to remove fragment "
+                    +fragment.toString());
 
         try{
             transaction.commit();
             commitIds.get(managerKey).remove(commitIds.get(managerKey).size()-1);
         }catch(IllegalStateException exp){
-            throw new FragmentException("activity state has been lost, call transaction" +
+            throw new BlockExecution("activity state has been lost, call transaction" +
                     " in onPostResume instead of any other general or async method" +
                     " from activity.",exp);
         }catch(NullPointerException exp){
-            throw new FragmentException("trying to remove fragment which has not been added before");
+            throw new FragmentException(Utils.formatMessage("trying to remove fragment %s which has not been added before",
+                    fragment.toString()), exp);
         }
 
     }
 
     //methods below has not been written yet
-    public synchronized void popBackStack() throws FragmentException{}
+    public synchronized void popBackStack() {}
 
-    public synchronized void popBackStackNested(String managerKey) throws FragmentException{}
+    public synchronized void popBackStackNested(String managerKey) {}
 
-    public synchronized void popBackStack(String tillTag, int flag) throws FragmentException{}
+    public synchronized void popBackStack(String tillTag, int flag) {}
 
-    public synchronized void popBackStackNested(String tillTag, int flag, String managerKey) throws FragmentException{}
+    public synchronized void popBackStackNested(String tillTag, int flag, String managerKey) {}
 
-    public synchronized void popBackStack(int tillCommit, int flag) throws FragmentException{}
+    public synchronized void popBackStack(int tillCommit, int flag) {}
 
-    public synchronized void popBackStackNested(int tillCommit, int flag, String managerKey) throws FragmentException{}
+    public synchronized void popBackStackNested(int tillCommit, int flag, String managerKey) {}
 
-    public synchronized void popBackStackImmediate() throws FragmentException{}
+    public synchronized void popBackStackImmediate() {}
 
-    public synchronized void popBackStackImmediateNested(String managerKey) throws FragmentException{}
+    public synchronized void popBackStackImmediateNested(String managerKey) {}
 
-    public synchronized void popBackStackImmediate(String tillTag, int flag) throws FragmentException{}
+    public synchronized void popBackStackImmediate(String tillTag, int flag) {}
 
-    public synchronized void popBackStackImmediateNested(String tillTag, int flag, String managerKey) throws FragmentException{}
+    public synchronized void popBackStackImmediateNested(String tillTag, int flag, String managerKey) {}
 
-    public synchronized void popBackStackImmediate(int tillCommit, int flag) throws FragmentException{}
+    public synchronized void popBackStackImmediate(int tillCommit, int flag) {}
 
-    public synchronized void popBackStackImmediateNested(int tillCommit, int flag, String managerKey) throws FragmentException{}
+    public synchronized void popBackStackImmediateNested(int tillCommit, int flag, String managerKey) {}
 
-    public synchronized void putFragment(Bundle bundleOfInstance, Fragment fragment, String tag) throws FragmentException{}
+    public synchronized void putFragment(Bundle bundleOfInstance, Fragment fragment, String tag) {}
 
-    public synchronized void putFragmentNested(Bundle bundleOfInstance, Fragment fragment, String tag, String managerKey) throws FragmentException{}
+    public synchronized void putFragmentNested(Bundle bundleOfInstance, Fragment fragment, String tag, String managerKey) {}
 
-    public synchronized Fragment getFragment(Bundle bundleOfInstance, String tag) throws FragmentException{ return null;}
+    public synchronized Fragment getFragment(Bundle bundleOfInstance, String tag) { return null;}
 
-    public synchronized Fragment getFragmentNested(Bundle bundleOfInstance, String tag, String managerKey) throws FragmentException{ return null;}
+    public synchronized Fragment getFragmentNested(Bundle bundleOfInstance, String tag, String managerKey) { return null;}
 
-    public synchronized void setTragetFragment(Fragment fragment) throws FragmentException{}
+    public synchronized void setTragetFragment(Fragment fragment) {}
 
-    public synchronized void setTragetFragmentNested(Fragment fragment, String managerKey) throws FragmentException{}
+    public synchronized void setTragetFragmentNested(Fragment fragment, String managerKey) {}
 
-    public synchronized Fragment getTargetFragment() throws FragmentException{ return null;}
+    public synchronized Fragment getTargetFragment() { return null;}
 
-    public synchronized Fragment getTargetFragmentNested(String managerKey) throws FragmentException{ return null;}
+    public synchronized Fragment getTargetFragmentNested(String managerKey) { return null;}
+
 
 }
