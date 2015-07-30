@@ -22,3 +22,4 @@
 /*/build/
 #signings
 .signing/
+/captures/*
