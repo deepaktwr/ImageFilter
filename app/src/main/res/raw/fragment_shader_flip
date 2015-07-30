@@ -1,0 +1,46 @@
+#version 300 es
+uniform sampler2D myTexture;
+smooth in vec2 textureCoords;
+const float blurSize=1.0/720.0;
+const vec4 W = vec4(0.5125, 0.9354, 0.3721,0.1);
+out vec4 outputColor;
+
+void main()
+{
+
+vec4 sum=vec4(0.0);
+sum+=texture(myTexture,vec2(textureCoords.x-3.7*blurSize,textureCoords.y))*0.04;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y-3.7*blurSize))*0.04;
+
+sum+=texture(myTexture,vec2(textureCoords.x-2.7*blurSize,textureCoords.y))*0.08;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y-2.7*blurSize))*0.08;
+
+sum+=texture(myTexture,vec2(textureCoords.x-1.7*blurSize,textureCoords.y))*0.11;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y-1.7*blurSize))*0.11;
+
+sum+=texture(myTexture,vec2(textureCoords.x-0.7*blurSize,textureCoords.y))*0.14;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y-0.7*blurSize))*0.14;
+
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y))*0.15;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y))*0.15;
+
+sum+=texture(myTexture,vec2(textureCoords.x+0.7*blurSize,textureCoords.y))*0.14;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y+0.7*blurSize))*0.14;
+
+sum+=texture(myTexture,vec2(textureCoords.x+1.7*blurSize,textureCoords.y))*0.11;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y+1.7*blurSize))*0.11;
+
+sum+=texture(myTexture,vec2(textureCoords.x+2.7*blurSize,textureCoords.y))*0.08;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y+2.7*blurSize))*0.08;
+
+sum+=texture(myTexture,vec2(textureCoords.x+3.7*blurSize,textureCoords.y))*0.04;
+sum+=texture(myTexture,vec2(textureCoords.x,textureCoords.y+3.7*blurSize))*0.04;
+
+sum.b-=0.02;
+float satT=0.98;
+float lum=2.60;
+vec4 gray=vec4(lum,lum,lum,lum);
+vec4 satColor=mix(gray,sum,satT);
+
+outputColor=satColor;
+}

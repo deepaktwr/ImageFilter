@@ -1,0 +1,6 @@
+#version 300 es
+smooth in vec2 fragColor;
+out vec4 myColor;
+void main(){
+    myColor = vec4(fragColor.r, fragColor.g, .5f, 1f);
+}

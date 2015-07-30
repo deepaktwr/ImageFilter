@@ -1,0 +1,7 @@
+#version 300 es
+layout(location = 0) in vec4 position;
+uniform vec2 data;
+void main(){
+    vec4 dataVal = vec4(data.x, data.y, 0.0,0.0);
+    gl_Position = position + dataVal;
+}

@@ -1,0 +1,37 @@
+#version 300 es
+uniform sampler2D myTexture;
+smooth in vec2 textureCoords;
+const float blur=1.0/720.0;
+out vec4 outputColor;
+//const vec4 W = vec4(0.5125, 0.9354, 0.3721,0.1);
+
+void main()
+{
+//vec2 tc=textureCoords;
+vec4 sum=vec4(0.0);
+
+    sum += texture(myTexture, vec2(textureCoords.x - 4.0*blur, textureCoords.y - 4.0*blur)) * 0.0473162162;
+	sum += texture(myTexture, vec2(textureCoords.x - 3.0*blur, textureCoords.y - 3.0*blur)) * 0.0770540541;
+	sum += texture(myTexture, vec2(textureCoords.x - 2.0*blur, textureCoords.y - 2.0*blur)) * 0.1446216216;
+	sum += texture(myTexture, vec2(textureCoords.x - 1.0*blur, textureCoords.y - 1.0*blur)) * 0.2175945946;
+	
+	sum += texture(myTexture, vec2(textureCoords.x, textureCoords.y)) * 0.2411270270;
+	
+	sum += texture(myTexture, vec2(textureCoords.x + 1.0*blur, textureCoords.y + 1.0*blur)) * 0.2175945946;
+	sum += texture(myTexture, vec2(textureCoords.x + 2.0*blur, textureCoords.y + 2.0*blur)) * 0.1446216216;
+	sum += texture(myTexture, vec2(textureCoords.x + 3.0*blur,textureCoords.y + 3.0*blur)) * 0.0752540541;
+	sum += texture(myTexture, vec2(textureCoords.x + 4.0*blur, textureCoords.y + 4.0*blur)) * 0.0392162162;
+
+
+	//sum.b-=0.09;
+	float satT=0.93;
+	float lum=2.70;
+	vec4 gray=vec4(lum,lum,lum,lum);
+	vec4 satColor=mix(gray,sum,satT);
+
+	//float T=0.00006;
+	//vec4 black=vec4(0.0,0.0,0.0,0.0);
+	//vec4 sd=mix(sum,black,T);
+
+	outputColor=satColor;
+}

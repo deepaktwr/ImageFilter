@@ -1,0 +1,23 @@
+#version 300 es
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec4 color;
+
+smooth out vec4 fragColor;
+
+uniform vec2 offsetValue;
+uniform float zNear;
+uniform float zFar;
+uniform float scaleXY;
+
+void main(){
+    vec4 cameraPos = position + vec4(offsetValue.x, offsetValue.y, 0.0, 0.0);
+    vec4 clipPos;
+    clipPos.xy = cameraPos.xy * scaleXY;
+
+    clipPos.z = ((cameraPos.z * (zNear + zFar)) + (2.0* zNear * zFar)) / (zNear - zFar);
+    clipPos.w = -cameraPos.z;
+
+    gl_Position = clipPos;
+    fragColor = color;
+
+}

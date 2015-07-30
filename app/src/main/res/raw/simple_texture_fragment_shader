@@ -1,0 +1,10 @@
+#version 300 es
+uniform sampler2D myTexture;
+
+smooth in vec2 textureCoords;
+out vec4 outputColor;
+
+void main(){
+    outputColor = texture(myTexture, textureCoords);
+    //outputColor = vec4(textureCoords.r, textureCoords.g, 0.0, 1.0);
+}

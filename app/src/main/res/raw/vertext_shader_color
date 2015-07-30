@@ -1,0 +1,9 @@
+#version 300 es
+layout(location = 1) in vec4 color;
+layout(location = 0) in vec4 position;
+smooth out vec4 myColor;
+void main(){
+    gl_Position = position;
+    myColor = color;
+    gl_PointSize = 8.0f;
+}

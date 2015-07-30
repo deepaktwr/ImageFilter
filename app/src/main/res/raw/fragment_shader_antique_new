@@ -1,0 +1,71 @@
+#version 300 es
+uniform sampler2D myTexture;
+const vec4 W=vec4(0.399,0.687,0.344,0.01);
+//our screen resolution, set from Java whenever the display is resized
+//uniform vec2 resolution;
+
+//"in" attributes from our vertex shader
+
+smooth in vec2 textureCoords;
+out vec4 outputColor;
+
+//RADIUS of our vignette, where 0.5 results in a circle fitting the screen
+const float RADIUS = 0.75;
+
+//softness of our vignette, between 0.0 and 1.0
+const float SOFTNESS = 0.45;
+
+//sepia colour, adjust to taste
+const vec3 SEPIA = vec3(2.65, 2.08, 2.0); 
+
+void main() {
+	//sample our texture
+	vec4 texColor = texture(myTexture, textureCoords);
+		
+	//1.0 VIGNETTE
+	
+	//determine center position
+	vec2 position = textureCoords.xy - vec2(0.5);
+	
+	//determine the vector length of the center position
+	float len = length(position);
+	
+	//use smoothstep to create a smooth vignette
+	float vignette = smoothstep(RADIUS, RADIUS-SOFTNESS, len);
+	
+	//apply the vignette with 50% opacity
+	//texColor.rgb = mix(texColor.rgb, texColor.rgb * vignette, 0.5);
+		
+	//2.0 GRAYSCALE
+	
+	//convert to grayscale using NTSC conversion weights
+	float gray = 0.2;//dot(texColor.rgb, vec3(0.25, 0.55, 0.15));
+	
+	//3.0 SEPIA
+	
+	//create our sepia tone from some constant value
+	vec3 sepiaColor = vec3(gray) * SEPIA;
+		
+	//again we'll use mix so that the sepia effect is at 75%
+	texColor.rgb = mix(texColor.rgb, sepiaColor, 0.15);
+		
+	//final colour, multiplied by vertex colour
+	
+	//texColor.b+=0.02;
+	
+	float lum=dot(texColor,W);
+	vec4 gry=vec4(lum+0.5,lum+0.5,lum+0.2,lum+2.8);
+	float sat=0.3;
+	vec4 staC=mix(texColor,gry,sat);
+	
+	float Tt=1.65;
+	vec4 conT=vec4(0.5,0.5,0.5,0.5);
+	vec4 mx=mix(conT,staC,Tt);
+	
+	
+	float Ttt=0.79;
+	vec4 conTt=vec4(0.2,0.2,0.2,0.2);
+	vec4 mxt=mix(conTt,mx,Ttt);
+	//mxt.b+=0.006;
+	outputColor = mxt;
+}

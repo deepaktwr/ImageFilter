@@ -1,0 +1,7 @@
+#version 300 es
+//this comment is accepted
+out vec4 outputColor;
+void main(){
+    float mixVal = gl_FragCoord.y / 500.0;
+    outputColor = mix(vec4(1f,1f,1f,1f),vec4(.2f,.2f,.2f,1f), mixVal);
+}

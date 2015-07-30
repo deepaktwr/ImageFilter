@@ -1,0 +1,6 @@
+#version 300 es
+smooth in vec4 fragColor;
+out vec4 myColor;
+void main(){
+    myColor = fragColor;
+}

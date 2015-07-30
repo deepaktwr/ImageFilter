@@ -1,0 +1,40 @@
+#version 300 es
+uniform sampler2D myTexture;
+//our screen resolution, set from Java whenever the display is resized
+//uniform vec2 resolution;
+
+//"in" attributes from our vertex shader
+
+smooth in vec2 textureCoords;
+out vec4 outputColor;
+
+//RADIUS of our vignette, where 0.5 results in a circle fitting the screen
+const float RADIUS = 0.79;
+
+//softness of our vignette, between 0.0 and 1.0
+const float SOFTNESS = 0.8;
+
+
+void main() {
+	//sample our texture
+	vec4 texColor = texture(myTexture, textureCoords);
+		
+	//1.0 VIGNETTE
+	
+	//determine center position
+	vec2 position = textureCoords.xy - vec2(0.5);
+	
+	//determine the vector length of the center position
+	float len = length(position);
+	
+	//use smoothstep to create a smooth vignette
+	float vignette = smoothstep(RADIUS, RADIUS-SOFTNESS, len);
+	
+	//apply the vignette with 50% opacity
+	//texColor.rgb = mix(texColor.rgb, texColor.rgb * vignette, 0.5);
+	
+		texColor.rgb*=vignette;
+		
+		
+	outputColor =texColor;
+}

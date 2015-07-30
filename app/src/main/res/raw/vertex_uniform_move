@@ -1,0 +1,41 @@
+#version 300 es
+layout(location = 0) in float speedLimit;
+uniform float loopDuration;
+uniform vec4 pointsCoord;
+const float PI = 3.14159;
+smooth out vec2 fragColor;
+void main(){
+    vec4 centerCoord = vec4(pointsCoord.x, pointsCoord.y, 1.0, 1.0);
+    vec4 initialCoord = vec4(pointsCoord.z, pointsCoord.w, 1.0, 1.0);
+
+    float radius = distance(centerCoord, initialCoord);
+    vec4 topInitialCoord = vec4(centerCoord.x, radius+centerCoord.y, 1.0, 1.0);
+    /*the angle has been calculated via dot product of to vectors as a.b = ||a|| ||b|| cosA*/
+    float value = initialCoord.x*topInitialCoord.x+initialCoord.y*topInitialCoord.y/*+initialCoord.z*topInitialCoord.z*/;
+    /*float newValue = dot(initialCoord, topInitialCoord);*/
+    float angleBetweenTwoPoints = acos(value/pow(radius, 2.0));
+    /*the angle come will be in the range of [0-180]*/
+
+    float initialSpeedPoint = angleBetweenTwoPoints/180.0;
+
+    float currentSpeed = mod((initialSpeedPoint + speedLimit), loopDuration);
+
+    bvec2 isXNegative = lessThan(vec2(initialCoord.x, initialCoord.y), vec2(0.0,0.0));
+        if(isXNegative.x){
+            currentSpeed = currentSpeed*-1.0;
+        }
+
+    float pointX = centerCoord.x+radius * sin(180.0 * currentSpeed);
+    float pointY = centerCoord.y+radius * cos(180.0 * currentSpeed);
+
+    /*if(value == newValue)*/
+        /*gl_Position = vec4(0f, 0f, 1f, 1f);*/
+    /*else*/
+        /*gl_Position = vec4(radius, radius, 1f, 1f);*/
+    float colorChangeSpeed = abs(currentSpeed)+.2;
+    fragColor = mix(vec2(mod(colorChangeSpeed,1.0), .4), vec2(.3, mod(colorChangeSpeed,1.0)), vec2(mod(colorChangeSpeed,1.0), .8));
+
+    gl_Position = vec4(pointX, pointY, 1.0, 1.0);
+    gl_PointSize = 12.0;
+
+}

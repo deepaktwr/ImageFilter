@@ -1,4 +1,7 @@
-attribute vec4 vPosition;
+#version 300 es
+/* the attribute parameter is essential here, as it indicates that the vPosition attribute passed to vertex shader from opengl API to vertex shader as vertexArray*/
+layout(location = 0) in vec4 vPosition;
 void main(){
     gl_Position = vPosition;
+    /*gl_PointSize = 5f;*/
 }

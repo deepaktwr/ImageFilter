@@ -1,0 +1,29 @@
+#version 300 es
+uniform sampler2D myTexture;
+smooth in vec2 textureCoords;
+const vec3 W=vec3(0.299,0.587,0.144);
+out vec4 outputColor;
+
+vec3 BrightnessContrastSaturation(vec3 color, float brt, float con, float sat)
+{
+    vec3 black = vec3(0.1, 0.1, 0.1);
+    vec3 middle = vec3(0.5, 0.5, 0.5);
+    float luminance = dot(color, W);
+    vec3 gray = vec3(luminance, luminance, luminance);
+    vec3 brtColor = mix(black, color, brt);
+    vec3 conColor = mix(middle, brtColor, con);
+    vec3 satColor = mix(gray, conColor, sat);
+    return satColor;
+    }
+    void main()
+    {
+    vec3 irgb=texture(myTexture,textureCoords).rgb;
+
+    vec3 satColr=BrightnessContrastSaturation(irgb,0.86,1.5,1.0);
+    irgb.r+=1.5;
+    irgb.g+=1.45;
+    irgb.b+=1.60;
+
+    outputColor = vec4(mix(satColr, irgb, 0.17), 1.0);
+}
+

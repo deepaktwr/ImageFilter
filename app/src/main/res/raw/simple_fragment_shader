@@ -1,5 +1,6 @@
-precision mediump float;
-uniform vec4 vColor;
+#version 300 es
+/* gl_FragColor is essential here, otherwise the objects drawn on the opengl window has no color*/
+out vec4 outputColor;
 void main(){
-    gl_FragColor = vColor;
+    outputColor = vec4(1.0,0.0,0.0,1.0);
 }

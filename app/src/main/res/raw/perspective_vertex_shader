@@ -1,0 +1,28 @@
+#version 300 es
+layout(location = 1) in vec4 position;
+layout(location = 0) in vec4 color;
+
+uniform vec2 offsetValue;
+uniform float zNear;
+uniform float zFar;
+uniform float xyScaleValueOrFrustumScaleValue;
+
+smooth out vec4 colorValues;
+
+void main(){
+    vec4 cameraSpace = position + vec4(offsetValue.x, offsetValue.y, 0.0, 0.0);
+    vec4 myClipSpace;
+
+    myClipSpace.xy = cameraSpace.xy * xyScaleValueOrFrustumScaleValue;
+
+    float zValue = (cameraSpace.z * (zNear + zFar)) / (zNear - zFar);
+
+    zValue  = zValue + (2.0* (zNear*zFar) / (zNear - zFar));
+
+    myClipSpace.z = zValue;
+
+    myClipSpace.w = -cameraSpace.z;
+
+    gl_Position = myClipSpace;
+    colorValues = color;
+}

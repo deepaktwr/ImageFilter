@@ -1,0 +1,6 @@
+#version 300 es
+smooth in vec4 myColor;
+out vec4 outputColor;
+void main(){
+    outputColor = myColor;
+}

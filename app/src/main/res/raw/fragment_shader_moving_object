@@ -1,0 +1,6 @@
+#version 300 es
+smooth in vec4 rectColor;
+out vec4 myfragColor;
+void main(){
+    myfragColor = rectColor;
+}

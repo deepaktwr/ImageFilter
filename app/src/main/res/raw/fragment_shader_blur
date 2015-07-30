@@ -1,0 +1,43 @@
+#version 300 es
+uniform sampler2D myTexture;
+smooth in vec2 textureCoords;
+out vec4 outputColor;
+
+void main()
+{
+vec3 irgb=texture(myTexture,textureCoords).rgb;
+
+float ResS=720.0;
+float ResT=720.0;
+
+vec2 stp0=vec2(1.0/ResS,0.0);
+vec2 st0p=vec2(0.0,1.0/ResT);
+vec2 stpp=vec2(1.0/ResS,1.0/ResT);
+vec2 stpm=vec2(1.0/ResS,-1.0/ResT);
+
+vec3 i00=texture(myTexture,textureCoords).rgb;
+
+vec3 im1m1=texture(myTexture,textureCoords-stpp).rgb;
+vec3 ip1p1=texture(myTexture,textureCoords+stpp).rgb;
+
+vec3 im1p1=texture(myTexture,textureCoords-stpm).rgb;
+vec3 ip1m1=texture(myTexture,textureCoords+stpm).rgb;
+
+vec3 im10=texture(myTexture,textureCoords-stp0).rgb;
+vec3 ip10=texture(myTexture,textureCoords+stp0).rgb;
+
+vec3 i0m1=texture(myTexture,textureCoords-st0p).rgb;
+vec3 i0p1=texture(myTexture,textureCoords+st0p).rgb;
+
+vec3 target=vec3(0.0,0.0,0.0);
+
+target+= 1.0*(im1m1+ip1m1+ip1p1+im1p1);
+
+target+= 2.0*(im10+ip10+i0p1);
+
+target+= 4.0*(i00);
+
+target/= 16.0;
+
+outputColor=vec4(target,1.0);
+}

@@ -1,0 +1,15 @@
+#version 300 es
+uniform sampler2D myTexture;
+smooth in vec2 textureCoords;
+out vec4 outputColor;
+
+const vec3 W=vec3(0.299,0.587,0.144);
+void main()
+{
+vec2 st=textureCoords.st;
+vec3 irgb=texture(myTexture,st).rgb;
+float lum=dot(irgb,W);
+vec3 target=vec3(lum,lum,lum);
+
+outputColor=vec4(mix(target,irgb,0.0),1.0);
+}
