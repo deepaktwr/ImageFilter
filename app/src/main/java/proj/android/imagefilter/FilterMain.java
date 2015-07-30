@@ -3,11 +3,15 @@ package proj.android.imagefilter;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
 
+import proj.android.exceptions.BlockExecution;
 import proj.android.exceptions.FragmentException;
 import proj.android.fragments.FilterFragment;
+import proj.android.fragments.ImageFilterFragment;
+import proj.android.gl_helper.GlDecorator;
 import proj.android.helper.FragmentHelper;
 import proj.android.helper.Fragments;
 import proj.android.helper.Utils;
@@ -16,6 +20,7 @@ import proj.android.helper.Utils;
 public class FilterMain extends Activity {
 
     private FragmentHelper fragmentHelper;
+    private DisplayMetrics displayMetrics;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +28,10 @@ public class FilterMain extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_filter);
+        displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        GlDecorator.setScreenWidth(displayMetrics.widthPixels);
+        GlDecorator.setScreenHeight(displayMetrics.heightPixels);
 
         fragmentHelper = FragmentHelper.getInstance(this);
         try {
@@ -30,7 +39,9 @@ public class FilterMain extends Activity {
         }catch(FragmentException exception){
             Utils.logMessage("could not able to set the fragment manager");
         }
-        loadFragment(FilterFragment.getInstance(fragmentHelper.getFragmentInstanceTag()),
+        /*loadFragment(FilterFragment.getInstance(fragmentHelper.getFragmentInstanceTag()),
+                null, "FilterFragment", false, false);*/
+        loadFragment(ImageFilterFragment.getInstance(fragmentHelper.getFragmentInstanceTag()),
                 null, "FilterFragment", false, false);
 
     }
