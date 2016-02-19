@@ -1,6 +1,6 @@
 # ImageFilter
 
-Images has been filtered using shaders of opengl, multiple shaders has been present as a part of simple demos too.
+Images has been filtered using shaders of opengl 3.0, multiple shaders has been present as a part of simple demos too.
 
 # Technical Requirements
 
