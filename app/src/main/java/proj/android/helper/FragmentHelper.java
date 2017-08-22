@@ -28,30 +28,57 @@ public class FragmentHelper {
     private final Map<String,List<Integer>> commitIds = new HashMap<>();
     private final Map<String,List<String>> fragmentTag = new HashMap<>();
     private String DEFAULT_KEY = "INITIAL_KEY";
-    private static int activitytaskId;
+    private static int ACTIVITY_TASK_ID;
+    private  final int activityTaskId;
 
     private int inAnim, popInAnim, outAnim, popOutAnim;
 
     //methods has not been documented yet
     private FragmentHelper(Context context){
-        if(this.context == null)
-            this.context = context;
+        this.context = context;
+        this.activityTaskId = ACTIVITY_TASK_ID;
     }
 
     public static FragmentHelper getInstance(Activity activity){
-        activitytaskId = activity.getTaskId();
-        if(FRAGMENT_HELPER_MAP.get(activitytaskId) == null){
+        ACTIVITY_TASK_ID = activity.getTaskId();
+        if(FRAGMENT_HELPER_MAP.get(ACTIVITY_TASK_ID) == null){
             FragmentHelper fragmentHelperObj =new FragmentHelper(activity.getBaseContext());
-            FRAGMENT_HELPER_MAP.put(activitytaskId, fragmentHelperObj);
+            FRAGMENT_HELPER_MAP.put(ACTIVITY_TASK_ID, fragmentHelperObj);
         }
-        return FRAGMENT_HELPER_MAP.get(activitytaskId);
+        return FRAGMENT_HELPER_MAP.get(ACTIVITY_TASK_ID);
+    }
+
+    public FragmentManager getFragmentManager() throws FragmentException{
+        if(fragmentManager.get(DEFAULT_KEY) == null)
+            throw new FragmentException("manager has not been initialized yet," +
+                    " make sure the manager with container has been set before");
+        return fragmentManager.get(DEFAULT_KEY);
+    }
+    public FragmentManager getFragmentManager(String key) throws FragmentException{
+        if(fragmentManager.get(key) == null)
+            throw new FragmentException(Utils.formatMessage("manager with key = %s has not been initialized yet," +
+                    " make sure the manager with container has been set with this key before", key));
+        return fragmentManager.get(key);
+    }
+
+    public int getContainer() throws FragmentException{
+        if(containerId.get(DEFAULT_KEY) == 0)
+            throw new FragmentException("container id has not been initialized yet," +
+                    " make sure the manager with container has been set before");
+        return containerId.get(DEFAULT_KEY);
+    }
+    public int getContainer(String key) throws FragmentException{
+        if(containerId.get(key) == 0)
+            throw new FragmentException(Utils.formatMessage("container id with key = %s has not been initialized yet," +
+                    " make sure the manager with container has been set with this key before", key));
+        return containerId.get(key);
     }
 
     public String getFragmentInstanceTag(){
-        return DEFAULT_KEY+"_"+activitytaskId;
+        return DEFAULT_KEY+"_"+ activityTaskId;
     }
     public String getFragmentInstanceTag(String managerKey){
-        return managerKey+"_"+activitytaskId;
+        return managerKey+"_"+ activityTaskId;
     }
 
     public synchronized void setFragmentManagerWithContainer(FragmentManager fragmentManager, int containerId) throws FragmentException{
@@ -257,11 +284,11 @@ public class FragmentHelper {
                         " for this or any other fragment," +
                         " use different tag", fragment.toString()));
             this.fragmentTag.get(DEFAULT_KEY).add(fragmentTag);
-            transaction.replace(containerId.get(DEFAULT_KEY), fragment, fragmentTag);
+            transaction.add(containerId.get(DEFAULT_KEY), fragment, fragmentTag);
         }else {
             String newFragmentTag = getGeneratedFragmentTag(DEFAULT_KEY, fragment.getClass().getName());
             this.fragmentTag.get(DEFAULT_KEY).add(newFragmentTag);
-            transaction.replace(containerId.get(DEFAULT_KEY), fragment, newFragmentTag);
+            transaction.add(containerId.get(DEFAULT_KEY), fragment, newFragmentTag);
         }
 
         if(addToBackStack) {
@@ -318,11 +345,11 @@ public class FragmentHelper {
                         " for this or any other fragment," +
                         " use different tag", fragment.toString()));
             this.fragmentTag.get(managerKey).add(fragmentTag);
-            transaction.replace(containerId.get(managerKey), fragment, fragmentTag);
+            transaction.add(containerId.get(managerKey), fragment, fragmentTag);
         }else {
             String newFragmentTag = getGeneratedFragmentTag(managerKey, fragment.getClass().getName());
             this.fragmentTag.get(managerKey).add(newFragmentTag);
-            transaction.replace(containerId.get(managerKey), fragment, newFragmentTag);
+            transaction.add(containerId.get(managerKey), fragment, newFragmentTag);
         }
 
         if(addToBackStack) {
